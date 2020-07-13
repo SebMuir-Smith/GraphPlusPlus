@@ -185,19 +185,39 @@ int Grapher::setupScreen()
     SDL_RenderClear(renderer);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
+    initialised = false;
+
     return 0;
 }
 
-void Grapher::lineGraphFunction(int x1, int y1, int x2, int y2)
+void Grapher::lineGraphFunction(double x, double y, int nPoints)
 {
-    static int result = SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
+    if (!initialised){
+        initialised = true;
+        pointN = 0;
+        points = new SDL_FPoint[nPoints]; 
+    }
+
+    SDL_FPoint point;
+    point.x = x;
+    point.y = y;
+
+    points[pointN] = point;
+
+    pointN++;
+    std::cout << pointN << " " << nPoints << std::endl;
+    static int result = 0;
+    if (pointN == nPoints){
+      std::cout << "Drawing the big boi rn" <<  std::endl;
+      result = SDL_RenderDrawLinesF(renderer, points, nPoints);
+    }
 
     if (result != 0){
         std::cout << "error" << result << SDL_GetError() << std::endl;
         abort();
     }
 
-    std::cout << "Now Drawing x = " << x1 << " to " << x2 << " and y = " << y1 << " to " << y2 << std::endl;
+    std::cout << "Now Drawing x = " << x << " to y = " << y << std::endl;
 }
 
 

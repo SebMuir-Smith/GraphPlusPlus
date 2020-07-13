@@ -1,12 +1,14 @@
 #include <iostream>
 #include <string>
 #include <SDL2/SDL.h>
+#include <memory>
 
 class Grapher
     {
     private:
-        static const int SCREEN_WIDTH = 640;
-        static const int SCREEN_HEIGHT = 480;
+        int pointN;
+        SDL_FPoint *points;
+        bool initialised;
 
         /**
         * Log an SDL error with some error message to the output stream of our choice
@@ -36,9 +38,12 @@ class Grapher
     public:
         int setupScreen();
 
-        void lineGraphFunction(int x1, int y1, int x2, int y2);
+        void lineGraphFunction(double x, double y, int nPoints);
 
         void holdUntilQuit();
+
+        static const int SCREEN_WIDTH = 640;
+        static const int SCREEN_HEIGHT = 480;
         
         SDL_Renderer* renderer;
     };
