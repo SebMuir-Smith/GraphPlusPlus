@@ -185,39 +185,38 @@ int Grapher::setupScreen()
     SDL_RenderClear(renderer);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
-    initialised = false;
-
     return 0;
 }
 
-void Grapher::lineGraphFunction(double x, double y, int nPoints)
+void Grapher::lineGraphFunction(double *x, double *y, int nPoints, uint8_t r, uint8_t g, uint8_t b, uint8_t o)
 {
-    if (!initialised){
-        initialised = true;
-        pointN = 0;
-        points = new SDL_FPoint[nPoints]; 
-    }
 
+    SDL_FPoint points[nPoints];
     SDL_FPoint point;
-    point.x = x;
-    point.y = y;
 
-    points[pointN] = point;
+    for (int i = 0; i < nPoints; i++){
+        point.x = x[i];
+        point.y = y[i];
+        points[i] = point;
+        std::cout << "Now Drawing x = " << x[i] << " to y = " << y[i] << std::endl;
 
-    pointN++;
-    std::cout << pointN << " " << nPoints << std::endl;
-    static int result = 0;
-    if (pointN == nPoints){
-      std::cout << "Drawing the big boi rn" <<  std::endl;
-      result = SDL_RenderDrawLinesF(renderer, points, nPoints);
+        if (x[i] > SCREEN_WIDTH || x[i] < 0 || y[i] > SCREEN_HEIGHT || y[i] < 0 ){
+            std::cerr << "ERROR: POINT " << i << " IS OUT OF BOUNDS, x = " << x[i] << " y = " << y[i] << "\n";
+            throw 2;
+        }
     }
+    uint8_t _r, _g, _b, _o;
+
+    SDL_GetRenderDrawColor(renderer, &_r, &_g, &_b, &_o);
+    SDL_SetRenderDrawColor(renderer, r, g, b, o);
+    int result = SDL_RenderDrawLinesF(renderer, points, nPoints);
+    SDL_SetRenderDrawColor(renderer, _r, _g, _b, _o);
 
     if (result != 0){
         std::cout << "error" << result << SDL_GetError() << std::endl;
         abort();
     }
 
-    std::cout << "Now Drawing x = " << x << " to y = " << y << std::endl;
 }
 
 

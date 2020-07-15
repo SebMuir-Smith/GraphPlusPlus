@@ -6,9 +6,6 @@
 class Grapher
     {
     private:
-        int pointN;
-        SDL_FPoint *points;
-        bool initialised;
 
         /**
         * Log an SDL error with some error message to the output stream of our choice
@@ -38,7 +35,7 @@ class Grapher
     public:
         int setupScreen();
 
-        void lineGraphFunction(double x, double y, int nPoints);
+        void lineGraphFunction(double* x, double* y, int nPoints, uint8_t r, uint8_t g, uint8_t b, uint8_t o);
 
         void holdUntilQuit();
 
