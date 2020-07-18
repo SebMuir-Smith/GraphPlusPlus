@@ -75,6 +75,23 @@ void Grapher::logSDLError(std::ostream &os, const std::string &msg)
     os << msg << " error: " << SDL_GetError() << std::endl;
 }
 
+void Grapher::holdUntilMouse()
+{
+    SDL_RenderPresent(renderer);
+    bool quit = false;
+    SDL_Event e;
+    while (!quit)
+    {
+        while (SDL_PollEvent(&e))
+        {
+            if (e.type == SDL_MOUSEBUTTONDOWN)
+            {
+                quit = true;
+            }
+        }
+    }
+}
+
 void Grapher::holdUntilQuit()
 {
     SDL_RenderPresent(renderer);
@@ -90,6 +107,8 @@ void Grapher::holdUntilQuit()
             }
         }
     }
+
+    SDL_Quit();
 }
 
 /**
@@ -205,5 +224,74 @@ void Grapher::lineGraphFunction(SDL_FPoint *points, int nPoints, uint8_t r, uint
 
 }
 
+void Grapher::addLine(Line* line){
+    line_pointers.push_front(line);
+}
+
+void Grapher::updateLines(){
+    for (Line* line_pointer : line_pointers) {
+        line_pointer->updatePlot();
+        lineGraphFunction(line_pointer->points,
+         GRAPHING_ITERATIONS, line_pointer->r_colour, line_pointer->g_colour, line_pointer->b_colour, line_pointer->o_colour);
+    }
+}
+
+double testFunc(double x)
+{
+    return x * x;
+}
+
+double testFunc2(double x)
+{
+    return x < 10 ? x : x * 2;
+}
+
+double testFunc3(double x)
+{
+    return x * x * x;
+}
+
+double testFunc4(double x)
+{
+    return tan(x) > 0 ? std::min(tan(x), (double)2.0) : std::max(tan(x), -2.0);
+}
+
+
+int main(int nargs, char **args)
+{
+    Grapher grapher;
+
+    int result = grapher.setupScreen();
+    if (result)
+    {
+        return result;
+    }
+
+    Line cosLine;
+    Line sinLine;
+
+    cosLine = cosLine.addBounds(0,3).scaleTo(grapher.SCREEN_WIDTH, grapher.SCREEN_HEIGHT).addFunction(cos);
+    sinLine = sinLine.addBounds(0,3).scaleTo(grapher.SCREEN_WIDTH, grapher.SCREEN_HEIGHT).addFunction(sin);
+
+    grapher.addLine(&cosLine);
+    grapher.addLine(&sinLine);
+    grapher.updateLines();
+    grapher.holdUntilMouse();
+
+    for (int i = 1; i < 255; i++)
+    {
+        SDL_SetRenderDrawColor(grapher.renderer, 255, 255, 255, 255);
+        SDL_RenderClear(grapher.renderer);
+        //cosLine = cosLine.addBounds(((double) i)/10,3 + ((double) i)/10).addColour(0,i,0);
+        //sinLine = sinLine.addBounds(((double) i)/10,3 + ((double) i)/10).addColour(0,0,i);
+        grapher.updateLines();
+        SDL_RenderPresent(grapher.renderer);
+        std::cout << i;
+    }
+
+    grapher.holdUntilQuit();
+
+    return 0;
+}
 
 

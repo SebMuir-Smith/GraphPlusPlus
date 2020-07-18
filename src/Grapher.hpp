@@ -1,7 +1,8 @@
 #include <iostream>
 #include <string>
-#include <SDL2/SDL.h>
 #include <memory>
+#include <list>
+#include "Line.hpp"
 
 class Grapher
     {
@@ -32,10 +33,12 @@ class Grapher
 */
         void renderTexture(SDL_Texture *tex, SDL_Renderer *ren, int x, int y);
 
+        std::list<Line *> line_pointers;
+
+        void lineGraphFunction(SDL_FPoint *points, int nPoints, uint8_t r, uint8_t g, uint8_t b, uint8_t o);
+
     public:
         int setupScreen();
-
-        void lineGraphFunction(SDL_FPoint* x, int nPoints, uint8_t r, uint8_t g, uint8_t b, uint8_t o);
 
         void holdUntilQuit();
 
@@ -43,4 +46,11 @@ class Grapher
         static const int SCREEN_HEIGHT = 640;
         
         SDL_Renderer* renderer;
+
+        void addLine(Line* line);
+
+        void updateLines();
+
+        void holdUntilMouse();
+
     };
