@@ -19,31 +19,31 @@ Line::Line()
     yAdj = 0;
 }
 
-Line Line::addBounds(double xStart_in, double xEnd_in)
+Line* Line::addBounds(double xStart_in, double xEnd_in)
 {
     xStart = xStart_in;
     xEnd = xEnd_in;
 
-    return *this;
+    return this;
 }
 
-Line Line::addFunction(double (*functionToGraph_in)(double))
+Line* Line::addFunction(double (*functionToGraph_in)(double))
 {
     functionToGraph = functionToGraph_in;
 
-    return *this;
+    return this;
 }
 
-Line Line::addColour(uint8_t r, uint8_t g, uint8_t b, uint8_t o)
+Line* Line::addColour(uint8_t r, uint8_t g, uint8_t b, uint8_t o)
 {
     r_colour = r;
     g_colour = g;
     b_colour = b;
     o_colour = o;
-    return *this;
+    return this;
 }
 
-Line Line::scaleTo(int xSize, int ySize, int xOffset, int yOffset)
+Line* Line::scaleTo(int xSize, int ySize, int xOffset, int yOffset)
 {
     xAdj = xOffset;
     xScale = xSize;
@@ -51,10 +51,10 @@ Line Line::scaleTo(int xSize, int ySize, int xOffset, int yOffset)
     yAdj = yOffset;
     yScale = ySize;
 
-    return *this;
+    return this;
 }
 
-Line Line::updatePlot()
+Line* Line::updatePlot()
 {
 
     if (functionToGraphLastRun != functionToGraph || xStart != xStartLastRun || xEnd != xEndLastRun)
@@ -79,10 +79,10 @@ Line Line::updatePlot()
 
     //grapher.lineGraphFunction(points, GRAPHING_ITERATIONS, r_colour, g_colour, b_colour, o_colour);
 
-    return *this;
+    return this;
 }
 
-Line Line::runFunction()
+Line* Line::runFunction()
 {
     /* Now run the function and fill in values */
     double iterator = (xEnd - xStart);
@@ -100,5 +100,5 @@ Line Line::runFunction()
     xEndLastRun = xEnd;
     functionToGraphLastRun = functionToGraph;
 
-    return *this;
+    return this;
 }

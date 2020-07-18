@@ -270,8 +270,8 @@ int main(int nargs, char **args)
     Line cosLine;
     Line sinLine;
 
-    cosLine = cosLine.addBounds(0,3).scaleTo(grapher.SCREEN_WIDTH, grapher.SCREEN_HEIGHT).addFunction(cos);
-    sinLine = sinLine.addBounds(0,3).scaleTo(grapher.SCREEN_WIDTH, grapher.SCREEN_HEIGHT).addFunction(sin);
+    cosLine.addBounds(0,3)->scaleTo(grapher.SCREEN_WIDTH, grapher.SCREEN_HEIGHT)->addFunction(cos);
+    sinLine.addBounds(0,3)->scaleTo(grapher.SCREEN_WIDTH, grapher.SCREEN_HEIGHT)->addFunction(sin);
 
     grapher.addLine(&cosLine);
     grapher.addLine(&sinLine);
@@ -282,9 +282,24 @@ int main(int nargs, char **args)
     {
         SDL_SetRenderDrawColor(grapher.renderer, 255, 255, 255, 255);
         SDL_RenderClear(grapher.renderer);
-        //cosLine = cosLine.addBounds(((double) i)/10,3 + ((double) i)/10).addColour(0,i,0);
-        //sinLine = sinLine.addBounds(((double) i)/10,3 + ((double) i)/10).addColour(0,0,i);
+        cosLine.addBounds(((double) i)/10,3 + ((double) i)/10);
+        sinLine.addBounds(((double) i)/10,3 + ((double) i)/10);
+        cosLine.addColour(i * 100 % 255, i*50 % 255, i * 75 % 255);
         grapher.updateLines();
+        SDL_RenderPresent(grapher.renderer);
+        std::cout << i;
+    }
+
+    grapher.holdUntilMouse();
+    SDL_FPoint* p = cosLine.points;
+    for (int i = 1; i < 255; i++)
+    {
+        
+        SDL_SetRenderDrawColor(grapher.renderer, 255, 255, 255, 255);
+        SDL_RenderClear(grapher.renderer);
+        SDL_SetRenderDrawColor(grapher.renderer, 0, 0, i, 255);
+        //SDL_RenderDrawLinesF(grapher.renderer, p, i);
+        grapher.lineGraphFunction(p, i, 0,0,i,255);
         SDL_RenderPresent(grapher.renderer);
         std::cout << i;
     }
