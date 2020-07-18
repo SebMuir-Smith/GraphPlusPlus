@@ -188,23 +188,9 @@ int Grapher::setupScreen()
     return 0;
 }
 
-void Grapher::lineGraphFunction(double *x, double *y, int nPoints, uint8_t r, uint8_t g, uint8_t b, uint8_t o)
+void Grapher::lineGraphFunction(SDL_FPoint *points, int nPoints, uint8_t r, uint8_t g, uint8_t b, uint8_t o)
 {
 
-    SDL_FPoint points[nPoints];
-    SDL_FPoint point;
-
-    for (int i = 0; i < nPoints; i++){
-        point.x = x[i];
-        point.y = y[i];
-        points[i] = point;
-        std::cout << "Now Drawing x = " << x[i] << " to y = " << y[i] << std::endl;
-
-        if (x[i] > SCREEN_WIDTH || x[i] < 0 || y[i] > SCREEN_HEIGHT || y[i] < 0 ){
-            std::cerr << "ERROR: POINT " << i << " IS OUT OF BOUNDS, x = " << x[i] << " y = " << y[i] << "\n";
-            throw 2;
-        }
-    }
     uint8_t _r, _g, _b, _o;
 
     SDL_GetRenderDrawColor(renderer, &_r, &_g, &_b, &_o);

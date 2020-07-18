@@ -35,12 +35,12 @@ class Grapher
     public:
         int setupScreen();
 
-        void lineGraphFunction(double* x, double* y, int nPoints, uint8_t r, uint8_t g, uint8_t b, uint8_t o);
+        void lineGraphFunction(SDL_FPoint* x, int nPoints, uint8_t r, uint8_t g, uint8_t b, uint8_t o);
 
         void holdUntilQuit();
 
         static const int SCREEN_WIDTH = 640;
-        static const int SCREEN_HEIGHT = 480;
+        static const int SCREEN_HEIGHT = 640;
         
         SDL_Renderer* renderer;
     };
