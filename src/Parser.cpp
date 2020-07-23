@@ -1,15 +1,19 @@
+#include "Grapher.hpp"
 #include <stack>
-#include <string>
-#include<ctype.h>
 
-class Parser {
-    std::stack<int> integers;
+#include <ctype.h>
+
+enum TokenType{
+    NUMBER,
+    FUNCTION,
+    OPERATOR
 };
 
 class Token {
     public:
-    Token(char* string, int nChars){
+    Token(char* string, int nChars, TokenType tokenTypeIn){
         value = std::string(string, nChars);
+        tokenType = tokenTypeIn;
     }
 
     Token(){
@@ -17,6 +21,7 @@ class Token {
     }
 
     std::string value;
+    TokenType tokenType;
 };
 
 /* Returns the number of characters making up the next double in the string, if the next token is a double */
@@ -24,11 +29,11 @@ int isNumber(char* input){
     char* restOfString;
     double conversion = strtod(input, &restOfString);
 
-    return (input - restOfString) / (sizeof(char));
+    return (restOfString - input) / (sizeof(char));
 }
 
 bool searchFunctions(std::string search){
-    std::string validFunctions[] {
+    std::string validFunctions[3]{
         "sin", "cos", "tan"
     };
     int functionCount = 3;
@@ -62,9 +67,13 @@ int isOperator(char* input){
     return searchOperators(input[0]) ? 1 : 0;
 }
 
+void advanceString(char** input, int nChars){
+    *input = *input + sizeof(char) * nChars;
+}
+
 /* Add token to input stack and move along input string */
-void addToken(char** inputString, int nChars, std::stack<Token>* outputStack){
-    Token newToken(*inputString, nChars);
+void addToken(char** inputString, int nChars, std::stack<Token>* outputStack, TokenType tokenType){
+    Token newToken(*inputString, nChars, tokenType);
     outputStack->push(newToken);
     advanceString(inputString, nChars);
 }
@@ -77,10 +86,6 @@ void cleanSpaces(char** input){
     }
 
     advanceString(input, spaceCount);
-}
-
-void advanceString(char** input, int nChars){
-    *input = *input + sizeof(char) * nChars;
 }
 
 int precedence(Token token){
@@ -99,24 +104,23 @@ int leftAssociative(Token token){
     return !token.value.compare("^");
 }
 
-std::string shuntingYard(char* input, int nChars){
+std::stack<Token> shuntingYard(char* input){
     std::stack<Token> output;
     std::stack<Token> operators;
     Token currentChar;
     Token topChar;
-    for (int i = 0; i < nChars; i++){
+    while(*input){
         cleanSpaces(&input);
 
-        if (isNumber(input)){
-            addToken(&input, isNumber(input), &output);
-        }
-        else if (isFunction(input)){
-            addToken(&input, isFunction(input), &output);
+        if (isFunction(input)){
+            addToken(&input, isFunction(input), &output, TokenType::FUNCTION);
         }
         else if (isOperator(input)){
+            currentChar = Token(input, isOperator(input), TokenType::OPERATOR);
             advanceString(&input, isOperator(input));
-            currentChar = Token(input, isOperator(input));
+            if (operators.size() > 0){
             topChar = operators.top();
+            }
             while(operators.size() > 0 &&
              (precedence(currentChar) < precedence(topChar) || (precedence(currentChar) < precedence(topChar) && leftAssociative(currentChar))) 
              && !topChar.value.compare("(")){
@@ -126,27 +130,119 @@ std::string shuntingYard(char* input, int nChars){
              }
             operators.push(currentChar);
         }
-        else if (topChar.value.compare("(")){
-            addToken(&input, 1, &output);
+        else if (isNumber(input)){
+            addToken(&input, isNumber(input), &output, TokenType::NUMBER);
         }
-        else if (topChar.value.compare(")")){
+        else if (input[0] == '('){
+            addToken(&input, 1, &operators, TokenType::OPERATOR);
+        }
+        else if (input[0] == ')'){
             topChar = operators.top();
-            while(!topChar.value.compare("(")){
+            int wtf = topChar.value.compare("(");
+            int hey = !wtf;
+            while(topChar.value.compare("(") != 0){ /* Dunno what is going on here */
                 operators.pop();
+                wtf = topChar.value.compare("(");
                 output.push(topChar);
                 topChar = operators.top();
                 /* If the stack runs out without finding a left parenthesis, then there are mismatched parentheses. */
             }
-            if (topChar.value.compare("(")){
+            if (topChar.value.compare("(") == 0){
                 operators.pop(); /* Discard */
             }
+            advanceString(&input, 1);
         }
     }
 
+    /* Clean out operator stack */
     int numOperatorsLeft = operators.size();
     for (int i = 0; i < numOperatorsLeft; i++){
         topChar = operators.top();
         operators.pop();
         output.push(topChar);
     }
+
+    return output;
+}
+
+std::stack<Token> reverseStack(std::stack<Token> input){
+    std::stack<Token> output;
+
+    while (input.size() > 0){
+        output.push(input.top());
+        input.pop();
+    }
+
+    return output;
+}
+
+double evaluateFunction(std::string functionName, double argument){
+    if (functionName == "sin"){
+        return sin(argument);
+    }
+    if (functionName == "cos"){
+        return cos(argument);
+    }
+    if (functionName == "tan"){
+        return tan(argument);
+    }
+    throw 2;
+}
+
+double evaluateOperator(std::string operatorName, double arg1, double arg2){
+    if (operatorName == "+"){
+        return arg1 + arg2;
+    }
+    if (operatorName == "-"){
+        return arg1 - arg2;
+    }
+    if (operatorName == "*"){
+        return arg1 * arg2;
+    }
+    if (operatorName == "^"){
+        return pow(arg1, arg2);
+    }
+
+}
+
+double eval(std::stack<Token> function){
+    function = reverseStack(function);
+
+    Token currentToken;
+    double numberStackLag1;
+    double numberStackLag2;
+    std::stack<double> numberStack;
+    while (function.size() > 0){
+        currentToken = function.top();
+        if (currentToken.tokenType == TokenType::NUMBER){
+            numberStack.push(stod(currentToken.value));
+        }
+        else if(currentToken.tokenType == TokenType::FUNCTION){
+            /* Currently unary */
+            numberStackLag1 = numberStack.top();
+            numberStack.pop();
+            numberStack.push(evaluateFunction(currentToken.value, numberStackLag1));
+        }
+        else if (currentToken.tokenType == TokenType::OPERATOR){
+            numberStackLag1 = numberStack.top();
+            numberStack.pop();
+            numberStackLag2 = numberStack.top();
+            numberStack.pop();
+            numberStack.push(evaluateOperator(currentToken.value, numberStackLag1, numberStackLag2));
+        }
+        function.pop();
+    }
+
+    if (numberStack.size() != 1){
+        throw 2;
+    }
+    return numberStack.top();
+}
+
+int main(){
+    char string[]{'(', '5', '+', '6', ')', '*', '2'};
+    char* point;
+    point = string;
+    std::stack<Token> tokens = shuntingYard(point);
+    std::cout << eval(tokens);
 }

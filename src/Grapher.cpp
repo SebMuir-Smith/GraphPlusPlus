@@ -256,7 +256,7 @@ double testFunc4(double x)
     return tan(x) > 0 ? std::min(tan(x), (double)2.0) : std::max(tan(x), -2.0);
 }
 
-
+/*
 int main(int nargs, char **args)
 {
     Grapher grapher;
@@ -308,5 +308,5 @@ int main(int nargs, char **args)
 
     return 0;
 }
-
+*/
 
